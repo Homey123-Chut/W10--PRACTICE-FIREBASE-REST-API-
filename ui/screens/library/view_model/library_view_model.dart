@@ -14,6 +14,8 @@ class LibraryViewModel extends ChangeNotifier {
   final PlayerState playerState;
 
   AsyncValue<List<LibraryItemData>> data = AsyncValue.loading();
+  
+  List<LibraryItemData>? _cache;
 
   LibraryViewModel({
     required this.songRepository,
@@ -36,7 +38,12 @@ class LibraryViewModel extends ChangeNotifier {
     fetchSong();
   }
 
-  void fetchSong() async {
+  void fetchSong({bool forceRefresh = false}) async {
+    if (!forceRefresh && _cache != null) {
+      data = AsyncValue.success(_cache!);
+      notifyListeners();
+      return;
+    }
     // 1- Loading state
     data = AsyncValue.loading();
     notifyListeners();
@@ -61,6 +68,8 @@ class LibraryViewModel extends ChangeNotifier {
           )
           .toList();
 
+          _cache = data;
+
       this.data = AsyncValue.success(data);
 
     } catch (e) {
@@ -69,6 +78,8 @@ class LibraryViewModel extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  
 
   Future<void> likeSong(LibraryItemData data) async {
     final oldLike = data.song.like;
