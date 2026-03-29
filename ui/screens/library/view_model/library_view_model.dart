@@ -79,7 +79,14 @@ class LibraryViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  
+  void clearCache() {
+  _cache = null;
+  }
+
+  Future<void> refreshSongs() async {
+  clearCache();
+  fetchSong(forceRefresh: true);
+}
 
   Future<void> likeSong(LibraryItemData data) async {
     final oldLike = data.song.like;
