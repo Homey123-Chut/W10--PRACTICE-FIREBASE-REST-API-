@@ -8,7 +8,7 @@ import 'song_repository.dart';
 
 class SongRepositoryFirebase extends SongRepository {
   final Uri songsUri = Uri.https(
-    'test-a2a77-default-rtdb.asia-southeast1.firebasedatabase.app',
+    'w9-database-c101d-default-rtdb.asia-southeast1.firebasedatabase.app',
     '/songs.json',
   );
 
@@ -32,5 +32,39 @@ class SongRepositoryFirebase extends SongRepository {
   }
 
   @override
-  Future<Song?> fetchSongById(String id) async {}
+  Future<Song?> fetchSongById(String id) async {
+    final Uri songUri = Uri.https(
+      'w9-database-c101d-default-rtdb.asia-southeast1.firebasedatabase.app',
+      '/songs/$id.json',
+    );
+
+    final http.Response response = await http.get(songUri);
+
+    if (response.statusCode == 200) {
+      final data = json.decode(response.body);
+
+      if (data == null) return null;
+
+      return SongDto.fromJson(id, data);
+    } else {
+      throw Exception('Failed to load song');
+    }
+  }
+
+  @override
+  Future<void> likeSong(String songId, int likes) async {
+    final Uri likeUri = Uri.https(
+      'w9-database-c101d-default-rtdb.asia-southeast1.firebasedatabase.app',
+      '/songs/$songId/like.json',
+    );
+
+    final http.Response response = await http.patch(
+      likeUri,
+      body: json.encode(likes),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to like the song');
+    }
+}
 }
